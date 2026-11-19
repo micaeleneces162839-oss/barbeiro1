@@ -77,3 +77,32 @@ A GitHub Action em `.github/workflows/ci.yml` instala dependências, valida o sc
 - `GET /api/health` retorna status 200 quando a aplicação consegue consultar PostgreSQL, ou 503 quando não consegue. Não expõe credenciais.
 - O agendamento verifica novamente o limite diário de reservas e os bloqueios dentro da transação com o profissional bloqueado, evitando ultrapassar o limite em chamadas simultâneas.
 - Execute o banco atualizado antes de publicar uma nova versão da aplicação. Uma CI verde só valida uma instância de teste com o schema atualizado; não corrige automaticamente o banco da hospedagem real.
+
+
+## Publicação na Railway
+
+O repositório inclui um `Dockerfile` para executar o Next.js em modo standalone com Node.js 22. A imagem mantém o Prisma CLI disponível para as tarefas administrativas iniciais. A rota `/api/health` verifica a conexão com PostgreSQL e pode ser usada como health check.
+
+### Preparar o serviço
+1. Crie um projeto na Railway e adicione um serviço PostgreSQL.
+2. Crie um serviço a partir do repositório `micaeleneces162839-oss/barbeiro1`, branch `main`, usando a raiz do repositório. A Railway detecta o `Dockerfile` automaticamente.
+3. No serviço da aplicação, configure `DATABASE_URL` usando a referência da variável `DATABASE_URL` do serviço PostgreSQL (não cole credenciais no GitHub).
+4. Adicione um volume persistente ao serviço da aplicação, montado em `/app/uploads`, e configure `UPLOAD_DIR=/app/uploads`. Isso preserva fotos e vídeos enviados pelos usuários entre novas implantações.
+5. Configure o health check do serviço para `/api/health` e a porta pública para a porta interna `3000` (a aplicação também respeita a variável `PORT` fornecida pela plataforma).
+6. Configure `MASTER_USERNAME` e `MASTER_PASSWORD` como variáveis privadas da aplicação. Use uma senha forte, exclusiva e com pelo menos 12 caracteres; não a coloque no repositório.
+
+### Primeira implantação e banco de dados
+
+O projeto ainda não possui histórico de migrações Prisma versionadas. **Somente na primeira implantação, com o banco novo e vazio**, execute `npm run db:push` no serviço da aplicação para criar as tabelas. Se preferir usar o campo Pre-deploy Command da Railway, informe `npm run db:push` para essa primeira implantação e remova o comando depois que terminar. Não execute `db:push` automaticamente em implantações futuras de um banco com dados sem revisar as mudanças do schema e fazer backup: o fluxo de produção recomendado é adotar migrações versionadas e revisadas.
+
+Depois que a aplicação estiver no ar e o banco estiver criado, execute `npm run master:create` no terminal do serviço para criar a conta Master com as variáveis privadas configuradas. Não compartilhe a senha no chat nem em arquivos do projeto.
+
+### Verificação antes de divulgar o endereço
+
+- Abra `/api/health` e confirme resposta HTTP 200 com `database: "connected"`.
+- Teste cadastro, login, permissões, agenda, criação/cancelamento de reservas e upload de imagem/vídeo.
+- Confirme que os arquivos enviados continuam acessíveis após uma nova implantação.
+- Configure backups do PostgreSQL, política de retenção do volume, domínio e HTTPS na Railway.
+- Revise a política de privacidade e os procedimentos LGPD antes de receber dados reais de clientes.
+
+**Importante:** preparar o repositório não cria uma conta Railway, não provisiona recursos nem publica o site automaticamente. Essas etapas precisam ser concluídas no painel da Railway, com acesso à conta responsável pelo projeto.
