@@ -58,3 +58,11 @@
 
 /* Interactive dashboard filters */
 .analytics-period{display:inline-flex;border:1px solid #254b79;padding:3px;border-radius:11px;gap:2px;background:#0d1c33}.analytics-period button{border:0;cursor:pointer;background:transparent;color:#9db4d5;font-size:11px;padding:8px 12px;border-radius:8px;font-weight:750}.analytics-period button.selected{background:#126aff;color:#fff;box-shadow:0 3px 16px #0965ff55}.analytics-bars-scroller{overflow-x:auto;scrollbar-width:thin;scrollbar-color:#2a4e76 #0b1425}.analytics-bars.long{min-width:790px;gap:8px}.analytics-bars.long .analytics-column{gap:2px}.analytics-bars.long .analytics-bar{min-width:5px}.analytics-bars.long .analytics-day small{font-size:9px}.analytics-card-title{flex-wrap:wrap}.analytics-card-title h4{margin-bottom:0}.analytics-legend{margin-left:auto}@media(max-width:560px){.analytics-legend{width:100%;margin:0}.analytics-card-title{gap:12px}.analytics-period{margin-left:auto}}
+
+
+/* Remove completamente o selo do Lovable, incluindo texto e botão de fechar. */
+#lovable-badge {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
